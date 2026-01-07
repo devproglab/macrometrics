@@ -62,3 +62,27 @@ tidy_irf <- function(x, varlist = NULL) {
   }
   return(result)
 }
+tidy_hd <- function(x, series) {
+  if (!inherits(x, "svars")) stop('Inappropriate SVAR object!')
+  varnames <- rownames(x[["B"]])
+  hist <- hd(x, series = series)
+  df <- hist$hidec %>%
+    rename_with(~c('t', 'xdm', 'xhat', varnames)) %>%
+    mutate(resid = xdm - xhat)
+  xdm <- df %>%
+    select(t, xdm)
+  df %>%
+    select(-c(xdm, xhat)) %>%
+    pivot_longer(-t) %>%
+    left_join(xdm)
+}
+tidy_fevd <- function(x) {
+  if (!inherits(x, "varfevd")) stop('Inappropriate VAR object!')
+  varnames <- names(x)
+  df <- map_dfr(varnames, function(v) {
+   data.frame(x[[v]]) %>%
+      tibble() %>%
+      mutate(name = v, h = row_number())
+  }) %>%
+    pivot_longer(-c(name, h), names_to = 'shock')
+}
