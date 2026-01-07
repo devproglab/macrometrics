@@ -73,7 +73,7 @@ tidy_hd <- function(x, series) {
     select(t, xdm)
   df %>%
     select(-c(xdm, xhat)) %>%
-    pivot_longer(-t) %>%
+    pivot_longer(-t, names_to = 'shock') %>%
     left_join(xdm)
 }
 tidy_fevd <- function(x) {
@@ -82,7 +82,7 @@ tidy_fevd <- function(x) {
   df <- map_dfr(varnames, function(v) {
    data.frame(x[[v]]) %>%
       tibble() %>%
-      mutate(name = v, h = row_number())
+      mutate(var = v, h = row_number())
   }) %>%
-    pivot_longer(-c(name, h), names_to = 'shock')
+    pivot_longer(-c(var, h), names_to = 'shock')
 }
