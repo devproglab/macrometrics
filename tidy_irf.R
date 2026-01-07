@@ -1,5 +1,5 @@
 # Вспомогательная функция для удобства работы с IRF. Не имеет отношения к самой процедуре идентификации
-tidy_irf <- function(x) {
+tidy_irf <- function(x, varlist = NULL) {
   if (inherits(x, "varirf")) {
     list_to_long <- function(lst) {
       if (is.null(lst) || length(lst) == 0) return(NULL)
@@ -23,11 +23,15 @@ tidy_irf <- function(x) {
       merge(u[, c("h", "shock", "var", "u")], by = c("h", "shock", "var"))
   }
   if (inherits(x, "PosteriorIR")) {
+    if (is.null(dimnames(x)) & is.null(varlist)) {
+      stop("Please provide variable names in varlist")
+    }
+    names <- if (is.null(dimnames(x))) varlist else dimnames(x)[[1]]
     ll <- x %>%
       summary()
-    names(ll) <- dimnames(x)[[1]]
+    names(ll) <- names
     ll <- lapply(ll, function(j) {
-      names(j) <- dimnames(x)[[1]] 
+      names(j) <- names
       return(j)
     })
     norm_names <- function(x) {
