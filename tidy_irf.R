@@ -67,6 +67,7 @@ tidy_hd <- function(x, series) {
   varnames <- rownames(x[["B"]])
   hist <- hd(x, series = series)
   df <- hist$hidec %>%
+    as.data.frame() %>%
     rename_with(~c('t', 'xdm', 'xhat', varnames)) %>%
     mutate(resid = xdm - xhat)
   xdm <- df %>%
