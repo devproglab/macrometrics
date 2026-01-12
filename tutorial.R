@@ -200,6 +200,24 @@ usvar_irf_exp %>%
   facet_grid2(var ~ shock, scales = "free_y", labeller=label_parsed, axes = "margins", switch = "y", independent="y") +
   labs(x = NULL, y = NULL)
 
+## ----usvar_exp_eta----------------------------------------------------------------
+B <- usvar_exp %>% id.chol()
+shocks <- solve(B$B) %*% t(residuals(usvar_exp))
+usvar_exp_eta <- data.frame(t(shocks), us3eq_exp$date[-c(1:4)]) %>%
+  rename_with(~c('piexp', 'x', 'pi', 'i', 'date'))
+# Визуализация
+recessions <- read_xlsx('recessions.xlsx') %>%
+  filter(Peak >= usvar_exp_eta$date[1])
+usvar_exp_eta %>%
+  pivot_longer(-date, names_to = 'shock') %>%
+  tex_namer() %>%
+  ggplot() +
+  geom_line(aes(x=date, y=value)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  geom_rect(data = recessions, aes(xmin = Peak, xmax = Trough, ymin = -Inf, ymax = +Inf),  alpha = 0.5, inherit.aes = FALSE) +
+  facet_wrap(~shock, scales = 'free_y', ncol=1, labeller = label_parsed) +
+  labs(x = NULL, y = NULL)
+
 ## ----ussvar_exp_hd------------------------------------------------------------
 usvar_exp_hd <- usvar_exp %>%
   id.chol() %>%
